@@ -14,18 +14,20 @@ namespace GZipTest
     {
         private static void Main(string[] args)
         {
-            if (args.Length != 3)
+            //TODO: Validate
+            Settings settings = null;
+
+            try
             {
-                Console.WriteLine("Wrong arguments count");
+                settings = Settings.Parse(args);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
                 Environment.Exit(1);
             }
 
-            //TODO: Validate
-            var mode = args[0];
-            var inputPath = args[1];
-            var outputPath = args[2];
-
-            using (var archivator = new GZipArchivator(inputPath, outputPath))
+            using (var archivator = new GZipArchivator(settings))
             {
                 archivator.Start();
             }

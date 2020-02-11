@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using GZipTest.BLL.Collections;
+using GZipTest.BLL.Factories;
 using GZipTest.BLL.IO;
 using GZipTest.BLL.Models;
 using GZipTest.BLL.Processing;
@@ -11,15 +12,18 @@ namespace GZipTest.BLL
     public class GZipArchivator : IDisposable
     {
         private readonly BlockingQueue<Block> _processingBuffer;
+        private readonly IBlockProcessor _processor;
         private readonly IReader _reader;
         private readonly IWriter _writer;
         private readonly BlockingDictionary<int, Block> _writingBuffer;
 
-        public GZipArchivator(string inputPath, string outputPath)
+        public GZipArchivator(Settings settings)
         {
-            //TODO: inject processing mode and factory
-            _reader = new FileReader(inputPath, Constants.DefaultBlockSize);
-            _writer = new CompressedBlockFileWriter(outputPath);
+            var factory = ArchivatorFactory.CreateFactory(settings);
+            _reader = factory.GetReader();
+            _writer = factory.GetWriter();
+            _processor = factory.GetBlockProcessor();
+
             _processingBuffer = new BlockingQueue<Block>();
             _writingBuffer = new BlockingDictionary<int, Block>();
         }
@@ -71,8 +75,7 @@ namespace GZipTest.BLL
         {
             while (_processingBuffer.TryDequeue(out var blockToProcess))
             {
-                var compressor = new Compressor();
-                var processedBlock = compressor.Process(blockToProcess);
+                var processedBlock = _processor.Process(blockToProcess);
 
                 _writingBuffer.Add(processedBlock.Id, processedBlock);
             }
