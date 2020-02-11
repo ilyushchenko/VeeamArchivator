@@ -37,7 +37,7 @@ namespace GZipTest.BLL
 
             var processingThreads = new List<Thread>();
 
-            for (var i = 0; i < Environment.ProcessorCount + 2; i++)
+            for (var i = 0; i < Environment.ProcessorCount; i++)
             {
                 var processingThread = new Thread(Processing) {Name = $"Processing {i}"};
                 processingThreads.Add(processingThread);
