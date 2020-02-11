@@ -25,9 +25,11 @@ namespace GZipTest
             var inputPath = args[1];
             var outputPath = args[2];
 
-            var archivator = new GZipArchivator(inputPath);
-            archivator.Start();
-
+            using (var archivator = new GZipArchivator(inputPath, outputPath))
+            {
+                archivator.Start();
+            }
+            
             Console.Read();
         }
     }

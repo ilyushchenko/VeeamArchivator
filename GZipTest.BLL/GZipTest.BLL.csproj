@@ -41,7 +41,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\BlockingDictionary.cs" />
+    <Compile Include="Processing\Compressor.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="IO\CompressedBlockFileWriter.cs" />
+    <Compile Include="IO\FileWriter.cs" />
     <Compile Include="Models\Block.cs" />
     <Compile Include="Collections\BlockingQueue.cs" />
     <Compile Include="GZipArchivator.cs" />
