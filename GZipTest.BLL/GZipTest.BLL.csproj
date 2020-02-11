@@ -42,6 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Collections\BlockingDictionary.cs" />
+    <Compile Include="Factories\CompressorFactory.cs" />
+    <Compile Include="Factories\DecompressorFactory.cs" />
+    <Compile Include="IO\CompressedBlockFileReader.cs" />
     <Compile Include="Processing\Compressor.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="IO\CompressedBlockFileWriter.cs" />
@@ -52,7 +55,11 @@
     <Compile Include="IO\FileReader.cs" />
     <Compile Include="IO\IReader.cs" />
     <Compile Include="IO\IWriter.cs" />
+    <Compile Include="Processing\Decompressor.cs" />
+    <Compile Include="Factories\ArchivatorFactory.cs" />
+    <Compile Include="Processing\IBlockProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

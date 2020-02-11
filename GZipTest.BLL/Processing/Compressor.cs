@@ -4,7 +4,7 @@ using GZipTest.BLL.Models;
 
 namespace GZipTest.BLL.Processing
 {
-    public class Compressor
+    public class Compressor : IBlockProcessor
     {
         public Block Process(Block blockToCompress)
         {
