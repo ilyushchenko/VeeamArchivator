@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.IO.Compression;
 
 namespace GZipTest.BLL
@@ -22,9 +23,9 @@ namespace GZipTest.BLL
 
         public static Settings Parse(string[] args)
         {
-            if (args.Length != 3)
+            if (args?.Length != 3)
             {
-                throw new ArgumentException("Wrong arguments count");
+                throw new ArgumentException("Wrong arguments count. Usage: GZipTest.exe [compress/decompress] [input path] [output path]");
             }
 
             CompressionMode mode;
@@ -39,6 +40,32 @@ namespace GZipTest.BLL
                 default:
                     throw new ArgumentException("The first parameter should be archivation mode(compress/decompress)");
             }
+
+            if (args[1] == args[2])
+            {
+                throw new Exception("Input and output file must be different!");
+            }
+
+            var inputFileInfo = new FileInfo(args[1]);
+            if (!inputFileInfo.Exists)
+            {
+                throw new Exception("Invalid second argument. File not found!");
+            }
+            if (inputFileInfo.Length == 0)
+            {
+                throw new Exception("Invalid second argument. File empty!");
+            }
+
+            var outputFileInfo = new FileInfo(args[2]);
+            if (!Directory.Exists(outputFileInfo.DirectoryName))
+            {
+                throw new Exception("Invalid third argument. Output directory not found!");
+            }
+            if (outputFileInfo.Exists)
+            {
+                throw new Exception("Invalid third argument. File already exists!");
+            }
+
             return new Settings(args[1], args[2], mode);
         }
     }

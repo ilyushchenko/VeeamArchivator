@@ -16,7 +16,6 @@ namespace GZipTest
         private static void Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            //TODO: Validate
             Settings settings = null;
             try
             {
