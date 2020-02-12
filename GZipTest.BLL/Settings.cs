@@ -11,12 +11,14 @@ namespace GZipTest.BLL
             OutputPath = outputPath;
             Mode = mode;
             BlockSize = Constants.DefaultBlockSize;
+            BlocksLimit = Constants.DefaultBlocksLimit;
         }
 
         public string InputPath { get; }
         public string OutputPath { get; }
         public CompressionMode Mode { get; }
         public int BlockSize { get; set; }
+        public int BlocksLimit { get; }
 
         public static Settings Parse(string[] args)
         {
