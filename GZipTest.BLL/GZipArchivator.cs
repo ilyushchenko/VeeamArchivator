@@ -16,6 +16,7 @@ namespace GZipTest.BLL
         private readonly IReader _reader;
         private readonly IWriter _writer;
         private readonly BlockingDictionary<int, Block> _writingBuffer;
+        private Exception _error;
 
         public GZipArchivator(Settings settings)
         {
@@ -58,36 +59,62 @@ namespace GZipTest.BLL
             _writingBuffer.Close();
 
             writeThread.Join();
+
+            if (_error != null)
+            {
+                throw _error;
+            }
         }
 
         #region Producer / Consumer Parts Processing
 
         private void Read()
         {
-            while (_reader.CanRead)
+            try
             {
-                var readedBlock = _reader.ReadNext();
-                _processingBuffer.Enqueue(readedBlock);
+                while (_reader.CanRead && _error == null)
+                {
+                    var readedBlock = _reader.ReadNext();
+                    _processingBuffer.Enqueue(readedBlock);
+                }
+            }
+            catch (Exception e)
+            {
+                _error = e;
             }
         }
 
         private void Processing()
         {
-            while (_processingBuffer.TryDequeue(out var blockToProcess))
+            try
             {
-                var processedBlock = _processor.Process(blockToProcess);
-
-                _writingBuffer.Add(processedBlock.Id, processedBlock);
+                while (_processingBuffer.TryDequeue(out var blockToProcess) && _error == null)
+                {
+                    var processedBlock = _processor.Process(blockToProcess);
+                    _writingBuffer.Add(processedBlock.Id, processedBlock);
+                }
             }
+            catch (Exception e)
+            {
+                _error = e;
+            }
+
         }
 
         private void Write()
         {
             var blockIdToWrite = 0;
-            while (_writingBuffer.TryRemoveValue(blockIdToWrite, out var block))
+            try
             {
-                _writer.Write(block);
-                blockIdToWrite++;
+                while (_writingBuffer.TryRemoveValue(blockIdToWrite, out var block) && _error == null)
+                {
+                    _writer.Write(block);
+                    blockIdToWrite++;
+                }
+            }
+            catch (Exception e)
+            {
+                _error = e;
             }
         }
 
