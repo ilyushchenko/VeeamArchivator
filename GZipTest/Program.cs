@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,10 +14,10 @@ namespace GZipTest
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static int Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            Settings settings = null;
+            Settings settings;
             try
             {
                 settings = Settings.Parse(args);
@@ -24,13 +25,18 @@ namespace GZipTest
             catch (Exception e)
             {
                 ShowErrorAndExit("Problem with input arguments", e);
+                return 1; //For skip checking settings for null
             }
 
             try
             {
                 using (var archivator = new GZipArchivator(settings))
                 {
+                    Console.WriteLine($"Start processing. Mode: {settings.Mode}");
+                    var processingTime = Stopwatch.StartNew();
                     archivator.Start();
+                    processingTime.Stop();
+                    Console.WriteLine($"Done! Processed in {processingTime.Elapsed}");
                 }
             }
             catch (OutOfMemoryException memoryException)
@@ -45,12 +51,16 @@ namespace GZipTest
             {
                 ShowErrorAndExit("Unable to access file", accessException);
             }
+            catch (InvalidDataException invalidDataException)
+            {
+                ShowErrorAndExit("Decompressor error", invalidDataException);
+            }
             catch (Exception e)
             {
                 ShowErrorAndExit("Unexpected error", e);
             }
 
-            Console.Read();
+            return 0;
         }
 
         private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
