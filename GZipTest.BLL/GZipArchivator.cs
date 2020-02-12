@@ -11,6 +11,7 @@ namespace GZipTest.BLL
 {
     public class GZipArchivator : IDisposable
     {
+        private readonly Semaphore _blocksLimiter;
         private readonly BlockingQueue<Block> _processingBuffer;
         private readonly IBlockProcessor _processor;
         private readonly IReader _reader;
@@ -27,12 +28,14 @@ namespace GZipTest.BLL
 
             _processingBuffer = new BlockingQueue<Block>();
             _writingBuffer = new BlockingDictionary<int, Block>();
+            _blocksLimiter = new Semaphore(settings.BlocksLimit, settings.BlocksLimit);
         }
 
         public void Dispose()
         {
             _reader?.Dispose();
             _writer?.Dispose();
+            _blocksLimiter?.Dispose();
         }
 
         public void Start()
@@ -60,10 +63,7 @@ namespace GZipTest.BLL
 
             writeThread.Join();
 
-            if (_error != null)
-            {
-                throw _error;
-            }
+            if (_error != null) throw _error;
         }
 
         #region Producer / Consumer Parts Processing
@@ -74,6 +74,7 @@ namespace GZipTest.BLL
             {
                 while (_reader.CanRead && _error == null)
                 {
+                    _blocksLimiter.WaitOne();
                     var readedBlock = _reader.ReadNext();
                     _processingBuffer.Enqueue(readedBlock);
                 }
@@ -98,7 +99,6 @@ namespace GZipTest.BLL
             {
                 _error = e;
             }
-
         }
 
         private void Write()
@@ -110,6 +110,7 @@ namespace GZipTest.BLL
                 {
                     _writer.Write(block);
                     blockIdToWrite++;
+                    _blocksLimiter.Release();
                 }
             }
             catch (Exception e)
